@@ -20,6 +20,12 @@ import android.view.View.OnKeyListener;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences;
 
+//import android.support.v7.app.AlertDialog;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+
+import android.widget.Toast;
+
 public class MainActivity extends AppCompatActivity implements OnEditorActionListener, OnClickListener, OnCheckedChangeListener, OnKeyListener {
 
     private TextView teamA_score_textview, teamB_score_textview;
@@ -39,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements OnEditorActionLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        //variables to reference UI component actions
         teamA_score_textview = (TextView) findViewById(R.id.teamA_score_textview);
         teamB_score_textview = (TextView) findViewById(R.id.teamB_score_textview);
 
@@ -48,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements OnEditorActionLis
         decrease_TeamA_Button = (Button) findViewById(R.id.decrease_TeamA_Button);
         decrease_TeamB_Button = (Button) findViewById(R.id.decrease_TeamB_Button);
 
+        //make your variables (set above) actualy listen to you
         increase_TeamA_Button.setOnClickListener(this);
         increase_TeamB_Button.setOnClickListener(this);
 
@@ -62,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements OnEditorActionLis
         chngFactor6RadioButton = (RadioButton) findViewById(R.id.chngFactor6RadioButton);
 
         chngFactor2RadioButton.setChecked(true);
+        teamA_score_textview.setText("0");
+        teamB_score_textview.setText("0");
     }
 
     @Override
@@ -76,26 +85,39 @@ public class MainActivity extends AppCompatActivity implements OnEditorActionLis
 
     @Override
     public void onClick(View v){
+        boolean refresh_txtview = true;
         switch (v.getId()){
             case R.id.increase_TeamA_Button:
                 teamAScore = getCurrentScore('A');
                 teamAScore = teamAScore + chngFactor;
-                setTeamScore('A', teamAScore);
+                refresh_txtview = validateScore('A',teamAScore);
+                if (refresh_txtview){
+                    setTeamScore('A', teamAScore);
+                }
                 break;
             case R.id.increase_TeamB_Button:
                 teamBScore = getCurrentScore('B');
                 teamBScore = teamBScore + chngFactor;
-                setTeamScore('B', teamBScore);
+                refresh_txtview = validateScore('B',teamBScore);
+                if (refresh_txtview) {
+                    setTeamScore('B', teamBScore);
+                }
                 break;
             case R.id.decrease_TeamA_Button:
                 teamAScore = getCurrentScore('A');
                 teamAScore = teamAScore - chngFactor;
-                setTeamScore( 'A' , teamAScore);
+                refresh_txtview = validateScore('A',teamAScore);
+                if (refresh_txtview) {
+                    setTeamScore('A', teamAScore);
+                }
                 break;
             case R.id.decrease_TeamB_Button:
                 teamBScore = getCurrentScore('B');
                 teamBScore = teamBScore - chngFactor;
-                setTeamScore('B', teamBScore);
+                refresh_txtview = validateScore('B',teamBScore);
+                if (refresh_txtview) {
+                    setTeamScore('B', teamBScore);
+                }
                 break;
             /*default:
                 Default is like the else in an if statement
@@ -105,6 +127,35 @@ public class MainActivity extends AppCompatActivity implements OnEditorActionLis
                 break;
              */
         }
+    }
+
+    public boolean validateScore(char team , int score){
+        int new_val = 0;
+        boolean ret = true;
+        if (score > 50 ){
+            displayMessage("Score value can not exceed 50");
+            new_val = 50;
+            ret = false;
+        }else if (score < 0){
+            displayMessage("Score value can not be a negative value");
+            new_val = 0;
+            ret = false;
+        }
+
+        switch(team) {
+            case 'A' :
+                //Toast.makeText(getApplicationContext(),Integer.toString(new_val),
+                //        Toast.LENGTH_SHORT).show();
+                teamA_score_textview.setText(Integer.toString(new_val));
+                break;
+            case 'B' :
+                //Toast.makeText(getApplicationContext(),Integer.toString(new_val),
+                //        Toast.LENGTH_SHORT).show();
+                teamB_score_textview.setText(Integer.toString(new_val));
+                break;
+        }
+
+        return ret;
     }
 
     public int getCurrentScore(char team){
@@ -193,5 +244,21 @@ public class MainActivity extends AppCompatActivity implements OnEditorActionLis
 
         //billAmountString = savedValues.getString("billAmountString", "" );
         //tipPercent = savedValues.getFloat("tipPercent", 0.15f);
+    }
+
+    public void displayMessage(String message){
+        AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
+        builder1.setMessage(message);
+        builder1.setCancelable(true);
+
+        builder1.setPositiveButton(
+                "Yes",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        AlertDialog alert11 = builder1.create();
+        alert11.show();
     }
 }
